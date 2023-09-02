@@ -35,5 +35,5 @@ export class DigimonDto {
     @ApiProperty()
     description: string
     @ApiProperty()
-    techniques: ITechnique[]
+    techniques?: ITechnique[]
 }

@@ -27,7 +27,7 @@ export interface IDigimon {
     cost: number
     sprite: string
     description: string
-    techniques: ITechnique[]
+    techniques?: ITechnique[]
 }
 
 export interface ITechnique {

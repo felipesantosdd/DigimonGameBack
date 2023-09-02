@@ -10,13 +10,14 @@ export class DigimonsController {
     constructor(private readonly digimonsService: DigimonsService) { }
 
     @Get()
-    index(): IDigimon[] {
-        return this.digimonsService.findAll()
+    async index(): Promise<IDigimon[]> {
+        const digimons = await this.digimonsService.findAll()
+        return digimons
     }
 
     @Post()
     @ApiBody({ type: DigimonDto })
-    create(@Body() digimon: DigimonDto): DigimonDto {
+    async create(@Body() digimon: DigimonDto): Promise<DigimonDto> {
         return this.digimonsService.create(digimon);
     }
 }
