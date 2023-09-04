@@ -1,5 +1,5 @@
 import { IDigiEgg } from "../digimons/digimon.interface";
-import { IItens } from "../item/itens.interface";
+import { IItens } from "../item/items.interface";
 
 export interface ITamer {
     id?: string;

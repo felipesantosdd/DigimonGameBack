@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EggEntity } from './database/egg.entity';
 import { Repository } from 'typeorm';
 import { IDigiEgg } from './egg.interface';
-import { DigimonEntity } from '../digimons/database/digimon.entity';
 import { CronJob } from 'cron';
+import { DigimonEntity } from '../digimons/database/digimon.entity'
 import { TamerEntity } from '../tamer/database/tamer.entity';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class EggService {
 
     constructor(
         @InjectRepository(EggEntity) private eggRepository: Repository<EggEntity>,
-        @InjectRepository(DigimonEntity) private digimonRepository: Repository<DigimonEntity>,
+        @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>,
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
     ) {
         this.healthManagementJob = new CronJob('* * * * *', this.heathManagement.bind(this));
@@ -70,7 +70,7 @@ export class EggService {
                 return !egg.evolutions.some((existingEvo) => existingEvo.id === newEvo.id);
             });
 
-            const newEvolution = await this.digimonRepository.findOne({ where: { id: evolutionsToAdd[0]?.id } })
+            const newEvolution = await this.digimonsRepository.findOne({ where: { id: evolutionsToAdd[0]?.id } })
 
             egg.evolutions = [...egg.evolutions, newEvolution];
         }
@@ -83,6 +83,8 @@ export class EggService {
         egg.speed = data.speed || egg.speed
         egg.love = data.love || egg.love
         egg.aptitude = data.aptitude || egg.aptitude
+        egg.atualHp = data.atualHp || egg.atualHp
+        egg.atualMp = data.atualMp || egg.atualMp
         egg.health = data.health || egg.health
         egg.name = name || egg.name
 
@@ -124,7 +126,8 @@ export class EggService {
             {
                 where:
                     { id: eggId },
-                relations: { evolutions: true }
+                relations:
+                    { evolutions: true }
             })
 
         const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
@@ -189,11 +192,17 @@ export class EggService {
         eggs.map((egg) => {
             if (egg.form <= 2 && egg.atualHp <= egg.evolutionHp) {
                 egg.atualHp += Math.round(egg.evolutionHp * 0.1)
+                if (egg.atualHp > egg.evolutionHp) {
+                    egg.atualHp = egg.evolutionHp
+                }
                 this.eggRepository.save(egg)
             }
 
             if (egg.form <= 2 && egg.atualMp <= egg.evolutionMp) {
                 egg.atualMp += Math.round(egg.evolutionMp * 0.1)
+                if (egg.atualMp > egg.evolutionMp) {
+                    egg.atualMp = egg.evolutionMp
+                }
                 this.eggRepository.save(egg)
             }
 
@@ -201,8 +210,27 @@ export class EggService {
         })
     }
 
+    async useCurativo(id: string) {
+        try {
+            const egg = await this.eggRepository.findOne({ where: { id } });
+
+            if (!egg) {
+                throw new Error("Ovo não encontrado");
+            }
+
+            if (egg.atualHp < egg.evolutionHp) {
+                egg.atualHp += 10;
+                await this.eggRepository.save(egg);
+                console.log("Saúde recuperada");
+            } else {
+                console.log("Saúde já está cheia")
+            }
+        } catch (error) {
+            console.error(error.message);
+            return "Erro ao usar o curativo";
+        }
+    }
+
+
 }
 
-
-
-// sua missão agora é fazer as alterações nescessarias para que os dados base do digimon sejam setados corretamente, depois disso, implemente a alimentação

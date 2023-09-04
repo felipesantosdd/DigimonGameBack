@@ -1,7 +1,7 @@
 import { DigimonsService } from './digimons.service';
 import { Controller, Post, Body, Get, Param, Patch } from '@nestjs/common';
 import { ApiBody } from '@nestjs/swagger';
-import { IDigimon } from 'src/digimons/digimon.interface';
+import { IDigimon } from '../digimons/digimon.interface';
 import { DigimonDto } from './dto/digimons.dto';
 
 @Controller('digimons')

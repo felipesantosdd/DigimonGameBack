@@ -13,4 +13,7 @@ export class ItemEntity {
 
     @Column()
     effect: string;
+
+    @Column({ default: 'https://www.grindosaur.com/img/games/digimon-world-next-order/icons/special-item-icon.png' })
+    sprite: string
 }

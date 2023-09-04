@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IDigiEgg } from "src/egg/egg.interface";
-import { IItens } from "src/item/itens.interface";
+import { IItems } from "src/item/items.interface";
+
 
 export class TamerDto {
     @ApiProperty()
@@ -19,7 +20,7 @@ export class TamerDto {
     digimons: IDigiEgg[]
 
     @ApiProperty()
-    bag: IItens[]
+    bag: IItems[]
 
     @ApiProperty()
     image: string
