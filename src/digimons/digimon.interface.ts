@@ -1,19 +1,8 @@
-export interface IDigiEgg {
-    id: string
-    hp: number
-    mp: number
-    defense: number
-    speed: number
-    aptitude: number
-    love: number
-    health: number
-    evolutions: IDigimon[]
-}
 
 export interface IDigimon {
     id: string
     name: string
-    level: string
+    level: number
     species: string
     type: string
     core: string

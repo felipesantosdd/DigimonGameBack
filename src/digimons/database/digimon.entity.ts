@@ -2,12 +2,12 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity()
 export class DigimonEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string
     @Column()
     name: string
-    @Column()
-    level: string
+    @Column({ default: 0 })
+    level: number
     @Column()
     species: string
     @Column()
