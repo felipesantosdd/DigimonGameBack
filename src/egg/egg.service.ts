@@ -52,6 +52,13 @@ export class EggService {
         const egg: IDigiEgg = await this.eggRepository.create()
         const tamer = await this.tamerRepository.findOne({ where: { id: data.id } })
         egg.tamer = tamer
+
+        const evolutions = await this.digimonsRepository.find({ where: { level: 1 } })
+        const randomIndex = Math.floor(Math.random() * evolutions.length);
+        const randomEvolution = evolutions[randomIndex];
+
+        egg.evolutions.push(randomEvolution)
+
         await this.eggRepository.save(egg)
 
         return egg
@@ -210,7 +217,7 @@ export class EggService {
         })
     }
 
-    async useCurativo(id: string) {
+    async recoverHp(id: string, value: number) {
         try {
             const egg = await this.eggRepository.findOne({ where: { id } });
 
@@ -219,7 +226,7 @@ export class EggService {
             }
 
             if (egg.atualHp < egg.evolutionHp) {
-                egg.atualHp += 10;
+                egg.atualHp += value;
                 await this.eggRepository.save(egg);
                 console.log("Saúde recuperada");
             } else {

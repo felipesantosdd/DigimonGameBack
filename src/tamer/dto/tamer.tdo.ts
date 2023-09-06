@@ -14,7 +14,7 @@ export class TamerDto {
     email: string
 
     @ApiProperty()
-    password: string
+    password?: string
 
     @ApiProperty()
     digimons: IDigiEgg[]

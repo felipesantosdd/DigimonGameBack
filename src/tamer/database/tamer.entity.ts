@@ -5,7 +5,7 @@ import { PrimaryGeneratedColumn, Column, Entity, ManyToMany, JoinTable, OneToMan
 @Entity()
 export class TamerEntity {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id?: string;
 
     @Column()
     name: string;
@@ -14,7 +14,7 @@ export class TamerEntity {
     email: string;
 
     @Column()
-    password: string;
+    password?: string;
 
     @Column({ default: 'https://cdn-icons-png.flaticon.com/512/147/147142.png' })
     image: string;

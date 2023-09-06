@@ -1,13 +1,12 @@
-import { IDigiEgg } from "../digimons/digimon.interface";
-import { IItens } from "../item/items.interface";
+import { IDigiEgg } from "../egg/egg.interface"
+import { IItems } from "../item/items.interface";
 
 export interface ITamer {
     id?: string;
     name: string
-    password: string
+    password?: string
     digimons: IDigiEgg[]
-    bag: IItens[]
+    bag: IItems[]
     image: string
     email: string
 }
-

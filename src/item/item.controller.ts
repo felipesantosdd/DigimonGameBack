@@ -35,9 +35,9 @@ export class ItemController {
     @ApiBody({ type: EggDto })
     async useItem(@Param('id') id: string, @Body() digiId: { id: string }): Promise<void> {
         const item = await this.itemService.findOne(id)
-        switch (item.name) {
-            case 'Curativo':
-                await this.eggService.useCurativo(digiId.id)
+        switch (item.type) {
+            case 'HP':
+                await this.eggService.recoverHp(digiId.id, item.effect)
                 break
         }
         return

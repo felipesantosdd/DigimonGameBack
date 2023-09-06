@@ -1,0 +1,2 @@
+
+docker run -d --name DigimonBack --network bridge --192.168.1.3 node:18

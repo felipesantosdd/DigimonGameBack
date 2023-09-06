@@ -11,7 +11,10 @@ export class ItemDto {
     description: string;
 
     @ApiProperty()
-    effect: string;
+    type: string;
+
+    @ApiProperty()
+    effect: number
 
     @ApiProperty()
     sprite: string
