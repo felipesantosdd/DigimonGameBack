@@ -32,4 +32,9 @@ export class TamerController {
         return this.tamerService.create(tamer)
     }
 
+    @Post('login')
+    async login(@Body() data: { name: string, password: string }) {
+        return this.tamerService.login(data.name, data.password);
+    }
+
 }

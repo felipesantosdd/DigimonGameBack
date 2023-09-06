@@ -8,6 +8,8 @@ import { AppError } from '../errors/index';
 import { EggEntity } from '../egg/database/egg.entity';
 import { DigimonEntity } from '../digimons/database/digimon.entity';
 import { CronJob } from 'cron';
+import { sign } from "jsonwebtoken";
+import { compare } from "bcryptjs";
 
 
 @Injectable()
@@ -105,11 +107,34 @@ export class TamerService {
         return res
     }
 
-    async login(email: string, password: string): Promise<any> {
-        const tamer = await this.tamerRepository.findOne({ where: { email: email } })
+    async login(user: string, pass: string): Promise<object> {
+        const tamer = await this.tamerRepository.findOne({
+            where: { name: user },
+            relations: {
+                bag: true,
+                digimons: true
+            }
+        })
 
-        console.log(tamer, password)
-        return
+        if (!tamer) {
+            throw new AppError('Usuario ou Password invalido ', 401)
+        }
+
+        const passMatch = await compare(pass, tamer.password)
+
+        if (!passMatch) {
+            throw new AppError('Usuario ou Password incorrecto', 401)
+        }
+
+        const token = sign(
+            { email: tamer.email }, String(process.env.SECRET_KEY),
+            { expiresIn: '30days', subject: String(tamer.id) }
+        )
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...response } = tamer
+
+        return ({ token: token, user: response })
     }
 
     async energyRecharge(): Promise<void> {
