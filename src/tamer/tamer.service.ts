@@ -57,6 +57,11 @@ export class TamerService {
             throw new AppError('Esse Nome ja esta sendo usado', 409);
         }
 
+        const nickExist = await this.tamerRepository.findOne({ where: { nickname: tamer.nickname } });
+        if (nickExist) {
+            throw new AppError('Esse Nickname ja esta sendo usado', 409);
+        }
+
         const salt = genSaltSync(10);
         tamer.password = hashSync(tamer.password, salt);
 
@@ -107,9 +112,12 @@ export class TamerService {
         return res
     }
 
-    async login(user: string, pass: string): Promise<object> {
+    async login(nick: string, pass: string): Promise<object> {
+
+        console.log(nick, pass)
+
         const tamer = await this.tamerRepository.findOne({
-            where: { name: user },
+            where: { nickname: nick },
             relations: {
                 bag: true,
                 digimons: true

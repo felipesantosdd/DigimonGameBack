@@ -11,6 +11,9 @@ export class TamerDto {
     name: string
 
     @ApiProperty()
+    nickname: string
+
+    @ApiProperty()
     email: string
 
     @ApiProperty()

@@ -12,4 +12,5 @@ export interface ITamer {
     maxEnergy: number
     atualEnergy: number
     xp: number
+    nickname: string
 }

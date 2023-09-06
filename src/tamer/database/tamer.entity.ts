@@ -11,6 +11,9 @@ export class TamerEntity {
     name: string;
 
     @Column()
+    nickname: string;
+
+    @Column()
     email: string;
 
     @Column()
