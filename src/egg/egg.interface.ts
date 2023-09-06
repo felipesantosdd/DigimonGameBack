@@ -22,4 +22,5 @@ export interface IDigiEgg {
     evolutionDefense: number
     evolutionSpeed: number
     evolutionAptitude: number
+    evolutionAttack: number
 }

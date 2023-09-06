@@ -26,6 +26,9 @@ export class EggEntity {
     atualMp: number;
 
     @Column({ default: 0 })
+    evolutionAttack: number
+
+    @Column({ default: 0 })
     atualHp: number
 
     @Column({ default: 0 })

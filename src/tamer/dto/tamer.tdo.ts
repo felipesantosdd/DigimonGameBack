@@ -25,4 +25,13 @@ export class TamerDto {
     @ApiProperty()
     image: string
 
+    @ApiProperty()
+    maxEnergy: number
+
+    @ApiProperty()
+    atualEnergy: number
+
+    @ApiProperty()
+    xp: number
+
 }

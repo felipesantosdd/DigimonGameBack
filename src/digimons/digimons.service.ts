@@ -19,6 +19,12 @@ export class DigimonsService {
         return digimons
     }
 
+
+    async findForLevel(level: number): Promise<IDigimon[]> {
+        const digimons = await this.digimonRepository.find({ where: { level: level } })
+        return digimons
+    }
+
     async create(digimon: IDigimon): Promise<IDigimon> {
         return await this.digimonRepository.save(digimon);
 

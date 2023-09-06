@@ -21,6 +21,12 @@ export class DigimonsController {
         return digimons
     }
 
+    @Get("/level/:level")
+    async get(@Param('level') level: number): Promise<IDigimon[]> {
+        const digimons = await this.digimonsService.findForLevel(level)
+        return digimons
+    }
+
     @Post()
     @ApiBody({ type: DigimonDto })
     async create(@Body() digimon: DigimonDto): Promise<DigimonDto> {

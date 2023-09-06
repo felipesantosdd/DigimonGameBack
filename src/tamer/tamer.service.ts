@@ -7,15 +7,21 @@ import { hashSync, genSaltSync } from 'bcryptjs'
 import { AppError } from '../errors/index';
 import { EggEntity } from '../egg/database/egg.entity';
 import { DigimonEntity } from '../digimons/database/digimon.entity';
+import { CronJob } from 'cron';
 
 
 @Injectable()
 export class TamerService {
+
+    private energyRechargeJob: CronJob
+
     constructor(
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
         @InjectRepository(EggEntity) private eggRepository: Repository<EggEntity>,
         @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>
-    ) { }
+    ) {
+        this.energyRechargeJob = new CronJob('* * * * *', this.energyRecharge.bind(this))
+    }
 
     async findOne(id: string): Promise<ITamer> {
         const tamer = await this.tamerRepository.findOne(
@@ -32,12 +38,7 @@ export class TamerService {
 
 
     async findAll(): Promise<ITamer[]> {
-        const tamers = await this.tamerRepository.find({
-            relations: {
-                digimons: true,
-                bag: true
-            }
-        })
+        const tamers = await this.tamerRepository.find()
 
         return tamers
     }
@@ -66,14 +67,24 @@ export class TamerService {
         const randomIndex = Math.floor(Math.random() * evolutions.length);
         const randomEvolution = evolutions[randomIndex];
 
-        console.log(randomEvolution)
 
+        egg.hp = randomEvolution.hp
+        egg.sprite = randomEvolution.sprite
+        egg.name = randomEvolution.name
+        egg.form = randomEvolution.level
+        egg.mp = randomEvolution.mp
+        egg.atualHp = randomEvolution.hp
+        egg.defense = randomEvolution.defense
+        egg.speed = randomEvolution.speed
+        egg.aptitude = randomEvolution.aptitude
+        egg.evolutionHp = randomEvolution.hp
+        egg.evolutionMp = randomEvolution.mp
+        egg.evolutionDefense = randomEvolution.defense
+        egg.evolutionSpeed = randomEvolution.speed
+        egg.evolutionAptitude = randomEvolution.aptitude
         egg.evolutions = [randomEvolution]
 
         await this.eggRepository.save(egg)
-
-
-
 
         const response = await this.tamerRepository.findOne({
             where: { id: tamer.id },
@@ -98,8 +109,22 @@ export class TamerService {
         const tamer = await this.tamerRepository.findOne({ where: { email: email } })
 
         console.log(tamer, password)
-
         return
+    }
+
+    async energyRecharge(): Promise<void> {
+        const tamers = await this.tamerRepository.find()
+
+        tamers.map((tamer) => {
+            if (tamer.atualEnergy < tamer.maxEnergy) {
+                tamer.atualEnergy += (tamer.maxEnergy * 0.1)
+                this.tamerRepository.save(tamer)
+            } else if (tamer.atualEnergy >= tamer.maxEnergy) {
+                tamer.atualEnergy = tamer.maxEnergy
+                this.tamerRepository.save(tamer)
+                console.log(`${tamer.name} Restaurou toda a sua energia.`)
+            }
+        })
     }
 
 

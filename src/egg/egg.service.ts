@@ -6,6 +6,7 @@ import { IDigiEgg } from './egg.interface';
 import { CronJob } from 'cron';
 import { DigimonEntity } from '../digimons/database/digimon.entity'
 import { TamerEntity } from '../tamer/database/tamer.entity';
+import { AppError } from '../errors';
 
 @Injectable()
 export class EggService {
@@ -28,8 +29,6 @@ export class EggService {
         this.restManagementJob.start();
     }
 
-
-
     async findOne(id: string): Promise<IDigiEgg> {
         const egg = await this.eggRepository.findOne({
             where: { id },
@@ -39,6 +38,10 @@ export class EggService {
             },
             order: { form: 'desc' }
         })
+
+        if (!egg) {
+            throw new AppError("Digimon Não encontrado", 404)
+        }
         return egg
     }
 
@@ -49,15 +52,43 @@ export class EggService {
 
     async create(data: { id: string }): Promise<IDigiEgg> {
 
-        const egg: IDigiEgg = await this.eggRepository.create()
-        const tamer = await this.tamerRepository.findOne({ where: { id: data.id } })
+        if (!data.id) {
+            throw new AppError('Não é possivel criar um novo digimon sem um Tamer', 400);
+        }
+
+        const tamer = await this.tamerRepository.findOne({
+            where: { id: data.id }
+        })
+
+        if (!tamer) {
+            throw new AppError("Tamer não encontrado", 404)
+        }
+
+        const egg: IDigiEgg = this.eggRepository.create()
+
+
         egg.tamer = tamer
 
         const evolutions = await this.digimonsRepository.find({ where: { level: 1 } })
         const randomIndex = Math.floor(Math.random() * evolutions.length);
         const randomEvolution = evolutions[randomIndex];
 
-        egg.evolutions.push(randomEvolution)
+        egg.evolutions = [randomEvolution]
+
+        egg.hp = randomEvolution.hp
+        egg.sprite = randomEvolution.sprite
+        egg.name = randomEvolution.name
+        egg.form = randomEvolution.level
+        egg.mp = randomEvolution.mp
+        egg.atualHp = randomEvolution.hp
+        egg.defense = randomEvolution.defense
+        egg.speed = randomEvolution.speed
+        egg.aptitude = randomEvolution.aptitude
+        egg.evolutionHp = randomEvolution.hp
+        egg.evolutionMp = randomEvolution.mp
+        egg.evolutionDefense = randomEvolution.defense
+        egg.evolutionSpeed = randomEvolution.speed
+        egg.evolutionAptitude = randomEvolution.aptitude
 
         await this.eggRepository.save(egg)
 
@@ -72,12 +103,24 @@ export class EggService {
                 order: { form: 'ASC' }
             })
 
+        if (!egg) {
+            throw new AppError("Digimon Não encontrado", 404)
+        }
+
         if (data.evolutions && data.evolutions.length > 0) {
             const evolutionsToAdd = data.evolutions.filter((newEvo) => {
                 return !egg.evolutions.some((existingEvo) => existingEvo.id === newEvo.id);
             });
 
             const newEvolution = await this.digimonsRepository.findOne({ where: { id: evolutionsToAdd[0]?.id } })
+
+            egg.evolutions.map((evo) => {
+                if (evo.level === newEvolution.level) {
+
+                    throw new AppError("Um digimmon não pode ter mais de uma evolução no mesmo estagio", 404)
+
+                }
+            })
 
             egg.evolutions = [...egg.evolutions, newEvolution];
         }
@@ -108,9 +151,14 @@ export class EggService {
                 relations: { evolutions: true }
             })
 
+        const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer.id } })
+
         const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
         const evolutions = egg.evolutions.filter(evo => evo.level <= evolution[0].level)
 
+        if (tamer.atualEnergy < evolution[0].cost) {
+            throw new AppError('Voce não possui energia para esta evolução no momento', 400)
+        }
 
         egg.evolutionHp = evolutions.reduce((acc, ev) => acc + ev.hp, egg.hp)
         egg.evolutionMp = evolutions.reduce((acc, ev) => acc + ev.mp, egg.mp)
@@ -128,7 +176,7 @@ export class EggService {
 
     }
 
-    async devolution(eggId: string, data: { evoId: string }): Promise<any> {
+    async devolution(eggId: string, data: { evoId: string }): Promise<IDigiEgg> {
         const egg = await this.eggRepository.findOne(
             {
                 where:
@@ -174,15 +222,15 @@ export class EggService {
             }
         })
 
-        eggs.map(egg => {
+        eggs.map(async (egg) => {
             if (egg.form >= 3) {
                 const evolution = egg.evolutions.filter(evolution => evolution.level == egg.form)
-                egg.atualMp -= evolution[0].cost
+                const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer.id } })
+                tamer.atualEnergy -= evolution[0].cost
                 this.eggRepository.save(egg)
 
-                console.log(`${egg.name} está com ${egg.atualMp} de mp`)
 
-                if (egg.atualMp <= 0) {
+                if (tamer.atualEnergy <= 0) {
                     const firstEvo = egg.evolutions.filter(evo => evo.level === 1)[0].id
                     const id = { evoId: firstEvo }
 

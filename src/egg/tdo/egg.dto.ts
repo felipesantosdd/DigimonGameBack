@@ -51,6 +51,9 @@ export class EggDto {
     evolutionMp: number
 
     @ApiProperty()
+    evolutionAttack: number
+
+    @ApiProperty()
     evolutionDefense: number
 
     @ApiProperty()

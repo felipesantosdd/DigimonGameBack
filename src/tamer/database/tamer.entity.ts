@@ -16,6 +16,15 @@ export class TamerEntity {
     @Column()
     password?: string;
 
+    @Column({ default: 50 })
+    maxEnergy: number;
+
+    @Column({ default: 50 })
+    atualEnergy: number
+
+    @Column({ default: 0 })
+    xp: number;
+
     @Column({ default: 'https://cdn-icons-png.flaticon.com/512/147/147142.png' })
     image: string;
 
@@ -23,7 +32,9 @@ export class TamerEntity {
     @JoinTable()
     bag: ItemEntity[]
 
-    @OneToMany(() => EggEntity, (egg) => egg.tamer)
+    @OneToMany(() => EggEntity, (egg) => egg.tamer, { cascade: true })
     digimons: EggEntity[]
+
+
 
 }

@@ -9,4 +9,7 @@ export interface ITamer {
     bag: IItems[]
     image: string
     email: string
+    maxEnergy: number
+    atualEnergy: number
+    xp: number
 }
