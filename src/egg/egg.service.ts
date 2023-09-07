@@ -151,10 +151,10 @@ export class EggService {
                 relations: { evolutions: true }
             })
 
-        const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer.id } })
+        const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer?.id } })
 
         const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
-        const evolutions = egg.evolutions.filter(evo => evo.level <= evolution[0].level)
+        const evolutions = egg.evolutions.filter(evo => evo?.level <= evolution[0]?.level)
 
         if (tamer.atualEnergy < evolution[0].cost) {
             throw new AppError('Voce não possui energia para esta evolução no momento', 400)

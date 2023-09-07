@@ -8,7 +8,7 @@ import { AppError } from '../errors/index';
 import { EggEntity } from '../egg/database/egg.entity';
 import { DigimonEntity } from '../digimons/database/digimon.entity';
 import { CronJob } from 'cron';
-import { sign } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
 import { compare } from "bcryptjs";
 
 
@@ -143,6 +143,28 @@ export class TamerService {
         const { password, ...response } = tamer
 
         return ({ token: token, user: response })
+    }
+
+
+    async authTamer(authToken: string): Promise<ITamer | null> {
+
+        console.log(authToken)
+
+        const token: string = authToken.split(' ')[1];
+
+        console.log(token);
+
+        return new Promise((resolve, reject) => {
+            verify(token, String(process.env.SECRET_KEY), (error: any, decoded: any) => {
+                if (error) {
+                    reject(new AppError(error.message, 401));
+                } else {
+                    console.log(decoded)
+                    const foundUser = this.tamerRepository.findOne({ where: { email: decoded.email }, relations: { digimons: true, bag: true } });
+                    resolve(foundUser || null);
+                }
+            });
+        });
     }
 
     async energyRecharge(): Promise<void> {

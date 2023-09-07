@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Param, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, NotFoundException, Req } from '@nestjs/common';
 import { TamerService } from './tamer.service';
 import { ITamer } from 'src/tamer/tamer.interface';
 import { ApiBody } from '@nestjs/swagger';
 import { TamerDto } from './dto/tamer.tdo';
+import { Request } from 'express';
 
 @Controller('tamer')
 export class TamerController {
@@ -35,6 +36,12 @@ export class TamerController {
     @Post('login')
     async login(@Body() data: { nick: string, password: string }) {
         return this.tamerService.login(data.nick, data.password);
+    }
+
+    @Post('auth')
+    async autoLogin(@Req() req: Request) {
+        const authToken = req.headers.authorization;
+        return this.tamerService.authTamer(authToken)
     }
 
 }
