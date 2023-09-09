@@ -44,10 +44,9 @@ export class TamerService {
 
     async evoCost(): Promise<void> {
         const tamers = await this.tamerRepository.find({ relations: { digimons: true } })
-        console.log('Ninguem perde energia nessa caralha não?')
 
         tamers.map(async (tamer) => {
-            if (tamer.digimons[0].form > 2) {
+            if (tamer.digimons[0]?.form > 2) {
                 const evolution = await this.digimonsRepository.findOne({ where: { name: tamer.digimons[0].name } })
                 tamer.atualEnergy = Number(tamer.atualEnergy - evolution.cost)
                 this.tamerRepository.save(tamer)
