@@ -21,6 +21,9 @@ console.log(env.parsed)
             password: env.parsed.DB_PASSWORD,
             entities: [DigimonEntity, EggEntity, TamerEntity, ItemEntity],
             synchronize: true,
+            ssl: {
+                rejectUnauthorized: false,
+            },
         })]
 })
 
