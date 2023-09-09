@@ -30,6 +30,9 @@ export class DigimonDto {
     mp: number
 
     @ApiProperty()
+    image: string
+
+    @ApiProperty()
     attack: number
 
     @ApiProperty()

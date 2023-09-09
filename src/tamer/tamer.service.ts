@@ -15,7 +15,8 @@ import { compare } from "bcryptjs";
 @Injectable()
 export class TamerService {
 
-    private energyRechargeJob: CronJob
+    private energyRechargeJob: CronJob;
+    private evoCostJob: CronJob
 
     constructor(
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
@@ -23,6 +24,9 @@ export class TamerService {
         @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>
     ) {
         this.energyRechargeJob = new CronJob('* * * * *', this.energyRecharge.bind(this))
+        this.energyRechargeJob.start()
+        this.evoCostJob = new CronJob('* * * * *', this.evoCost.bind(this))
+        this.evoCostJob.start()
     }
 
     async findOne(id: string): Promise<ITamer> {
@@ -38,10 +42,28 @@ export class TamerService {
         return tamer
     }
 
+    async evoCost(): Promise<void> {
+        const tamers = await this.tamerRepository.find({ relations: { digimons: true } })
+        console.log('Ninguem perde energia nessa caralha não?')
+
+        tamers.map(async (tamer) => {
+            if (tamer.digimons[0].form > 2) {
+                const evolution = await this.digimonsRepository.findOne({ where: { name: tamer.digimons[0].name } })
+                tamer.atualEnergy = Number(tamer.atualEnergy - evolution.cost)
+                this.tamerRepository.save(tamer)
+                console.log(`o Tamer: ${tamer.name} esta com ${tamer.atualEnergy} de energia`)
+            } else if (tamer.atualEnergy < 0) {
+                tamer.atualEnergy = 0
+                this.tamerRepository.save(tamer)
+            }
+
+        })
+    }
+
+
 
     async findAll(): Promise<ITamer[]> {
         const tamers = await this.tamerRepository.find()
-
         return tamers
     }
 
@@ -113,9 +135,6 @@ export class TamerService {
     }
 
     async login(nick: string, pass: string): Promise<object> {
-
-        console.log(nick, pass)
-
         const tamer = await this.tamerRepository.findOne({
             where: { nickname: nick },
             relations: {
@@ -146,22 +165,21 @@ export class TamerService {
     }
 
 
-    async authTamer(authToken: string): Promise<ITamer | null> {
+    async authTamer(authToken: string): Promise<ITamer | any> {
 
-        console.log(authToken)
+        if (!authToken) {
+            throw new AppError('Usuario sem autenticação', 401)
+        }
 
         const token: string = authToken.split(' ')[1];
 
-        console.log(token);
-
         return new Promise((resolve, reject) => {
-            verify(token, String(process.env.SECRET_KEY), (error: any, decoded: any) => {
+            verify(token, String(process.env.SECRET_KEY), async (error: any, decoded: any) => {
                 if (error) {
                     reject(new AppError(error.message, 401));
                 } else {
-                    console.log(decoded)
-                    const foundUser = this.tamerRepository.findOne({ where: { email: decoded.email }, relations: { digimons: true, bag: true } });
-                    resolve(foundUser || null);
+                    const foundUser = await this.tamerRepository.findOne({ where: { email: decoded.email }, relations: { digimons: true, bag: true } });
+                    resolve(foundUser);
                 }
             });
         });
@@ -172,12 +190,12 @@ export class TamerService {
 
         tamers.map((tamer) => {
             if (tamer.atualEnergy < tamer.maxEnergy) {
-                tamer.atualEnergy += (tamer.maxEnergy * 0.1)
+                tamer.atualEnergy += Number((tamer.maxEnergy * 0.01).toFixed())
                 this.tamerRepository.save(tamer)
+                console.log(`O Tamer ${tamer.name} Recuperou ${Number((tamer.maxEnergy * 0.01).toFixed())} de energia`)
             } else if (tamer.atualEnergy >= tamer.maxEnergy) {
                 tamer.atualEnergy = tamer.maxEnergy
                 this.tamerRepository.save(tamer)
-                console.log(`${tamer.name} Restaurou toda a sua energia.`)
             }
         })
     }

@@ -23,4 +23,5 @@ export interface IDigiEgg {
     evolutionSpeed: number
     evolutionAptitude: number
     evolutionAttack: number
+    image: string
 }

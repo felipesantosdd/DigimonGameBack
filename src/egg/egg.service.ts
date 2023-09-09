@@ -8,6 +8,7 @@ import { DigimonEntity } from '../digimons/database/digimon.entity'
 import { TamerEntity } from '../tamer/database/tamer.entity';
 import { AppError } from '../errors';
 
+
 @Injectable()
 export class EggService {
     private healthManagementJob: CronJob;
@@ -148,17 +149,26 @@ export class EggService {
             {
                 where:
                     { id: eggId },
-                relations: { evolutions: true }
+                relations: { evolutions: true, tamer: true }
             })
 
+
         const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer?.id } })
+
 
         const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
         const evolutions = egg.evolutions.filter(evo => evo?.level <= evolution[0]?.level)
 
-        if (tamer.atualEnergy < evolution[0].cost) {
+        if (tamer.atualEnergy < evolution[0].cost && evolutions[0].level > 2) {
             throw new AppError('Voce não possui energia para esta evolução no momento', 400)
         }
+
+        tamer.atualEnergy -= evolution[0].cost
+        await this.tamerRepository.save(tamer)
+
+        const Hp = Number((egg.atualHp / egg.evolutionHp).toFixed(2))
+        const Mp = Number((egg.atualMp / egg.evolutionMp).toFixed(2))
+
 
         egg.evolutionHp = evolutions.reduce((acc, ev) => acc + ev.hp, egg.hp)
         egg.evolutionMp = evolutions.reduce((acc, ev) => acc + ev.mp, egg.mp)
@@ -168,6 +178,11 @@ export class EggService {
         egg.form = evolution[0].level
         egg.sprite = evolution[0].sprite
         egg.name = evolution[0].name
+        egg.image = evolution[0].image
+
+        console.log("MaxHp:", egg.evolutionHp)
+        egg.atualHp = Math.floor(egg.evolutionHp * Hp)
+        egg.atualMp = Math.floor(egg.evolutionMp * Mp)
 
 
         await this.eggRepository.save(egg)
@@ -176,92 +191,105 @@ export class EggService {
 
     }
 
-    async devolution(eggId: string, data: { evoId: string }): Promise<IDigiEgg> {
-        const egg = await this.eggRepository.findOne(
-            {
-                where:
-                    { id: eggId },
-                relations:
-                    { evolutions: true }
-            })
+    // async devolution(eggId: string, data: { evoId: string }): Promise<IDigiEgg> {
+    //     const egg = await this.eggRepository.findOne(
+    //         {
+    //             where:
+    //                 { id: eggId },
+    //             relations:
+    //                 { evolutions: true }
+    //         })
 
-        const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
-        const evolutions = egg.evolutions.filter(evo => evo.level <= evolution[0].level)
-
-
-        egg.evolutionHp = evolutions.reduce((acc, ev) => acc + ev.hp, egg.hp)
-        egg.evolutionDefense = evolutions.reduce((acc, ev) => acc + ev.defense, egg.defense)
-        egg.evolutionSpeed = evolutions.reduce((acc, ev) => acc + ev.speed, egg.speed)
-        egg.evolutionAptitude = evolutions.reduce((acc, ev) => acc + ev.aptitude, egg.aptitude)
-        egg.form = evolution[0].level
-        egg.sprite = evolution[0].sprite
-        egg.name = evolution[0].name
+    //     const evolution = egg.evolutions.filter(evo => evo.id == data.evoId)
+    //     const evolutions = egg.evolutions.filter(evo => evo.level <= evolution[0].level)
 
 
-        await this.eggRepository.save(egg)
 
-        return egg
+    //     egg.evolutionHp = evolutions.reduce((acc, ev) => acc + ev.hp, egg.hp)
+    //     egg.evolutionDefense = evolutions.reduce((acc, ev) => acc + ev.defense, egg.defense)
+    //     egg.evolutionSpeed = evolutions.reduce((acc, ev) => acc + ev.speed, egg.speed)
+    //     egg.evolutionAptitude = evolutions.reduce((acc, ev) => acc + ev.aptitude, egg.aptitude)
+    //     egg.form = evolution[0].level
+    //     egg.sprite = evolution[0].sprite
+    //     egg.name = evolution[0].name
 
-    }
+
+
+
+    //     await this.eggRepository.save(egg)
+
+    //     return egg
+
+    // }
 
     async heathManagement() {
         const eggs = await this.eggRepository.find()
         eggs.map(egg => {
-            if (egg.health >= 2) {
-                egg.health -= 1
-                console.log(`${egg.name} está com ${egg.health} de saude`)
-                this.eggRepository.save(egg)
-            }
+            egg.health -= 1
+            this.eggRepository.save(egg)
+
         })
     }
 
     async evoCost() {
+        // Busca todos os eggs
         const eggs = await this.eggRepository.find({
             relations: {
-                evolutions: true
+                evolutions: true,
+                tamer: true
             }
-        })
+        });
+
 
         eggs.map(async (egg) => {
-            if (egg.form >= 3) {
-                const evolution = egg.evolutions.filter(evolution => evolution.level == egg.form)
-                const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer.id } })
-                tamer.atualEnergy -= evolution[0].cost
-                this.eggRepository.save(egg)
-
+            if (egg.form > 2) {
+                const evolution = egg.evolutions.filter(evolution => evolution.level === egg.form);
+                const tamer = await this.tamerRepository.findOne({ where: { id: egg.tamer?.id } });
+                if (!tamer) {
+                    throw new AppError("tamer não encontrado", 404)
+                }
+                tamer.atualEnergy = tamer.atualEnergy - evolution[0].cost;
+                await this.tamerRepository.save(tamer);
 
                 if (tamer.atualEnergy <= 0) {
-                    const firstEvo = egg.evolutions.filter(evo => evo.level === 1)[0].id
-                    const id = { evoId: firstEvo }
-
-                    this.devolution(egg.id, id)
-                    console.log(`${egg.name} Voltou a forma base`)
+                    const firstEvo = egg.evolutions.find(evo => evo.level === 1);
+                    tamer.atualEnergy = 0
+                    this.tamerRepository.save(tamer)
+                    if (firstEvo) {
+                        const id = { evoId: firstEvo.id };
+                        await this.evolution(egg.id, id);
+                        console.log(`${egg.name} devoluiu`)
+                    }
                 }
             }
         })
     }
+
+
 
     async restManagement() {
         const eggs = await this.eggRepository.find()
 
         eggs.map((egg) => {
-            if (egg.form <= 2 && egg.atualHp <= egg.evolutionHp) {
-                egg.atualHp += Math.round(egg.evolutionHp * 0.1)
+            if (egg.atualHp <= egg.evolutionHp) {
+                egg.atualHp += Math.round(egg.evolutionHp * 0.01)
                 if (egg.atualHp > egg.evolutionHp) {
                     egg.atualHp = egg.evolutionHp
+                }
+                if (Math.round(egg.evolutionHp * 0.01) > 0) {
+                    console.log(`${egg.name} recuperou ${Math.round(egg.evolutionHp * 0.01)} de Hp`)
                 }
                 this.eggRepository.save(egg)
             }
 
-            if (egg.form <= 2 && egg.atualMp <= egg.evolutionMp) {
-                egg.atualMp += Math.round(egg.evolutionMp * 0.1)
+
+            if (egg.atualMp <= egg.evolutionMp) {
+                egg.atualMp += Math.round(egg.evolutionMp * 0.01)
                 if (egg.atualMp > egg.evolutionMp) {
                     egg.atualMp = egg.evolutionMp
                 }
                 this.eggRepository.save(egg)
             }
-
-            console.log(`${egg.name} agora esta com ${egg.atualHp}Hp, ${egg.atualMp}Mp`)
         })
     }
 
@@ -284,6 +312,7 @@ export class EggService {
             console.error(error.message);
             return "Erro ao usar o curativo";
         }
+
     }
 
 

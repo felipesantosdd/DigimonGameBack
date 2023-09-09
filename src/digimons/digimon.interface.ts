@@ -17,6 +17,7 @@ export interface IDigimon {
     sprite: string
     description: string
     techniques?: ITechnique[]
+    image: string
 }
 
 export interface ITechnique {

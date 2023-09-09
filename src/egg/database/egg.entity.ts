@@ -37,6 +37,9 @@ export class EggEntity {
     @Column({ default: 0 })
     speed: number;
 
+    @Column({ default: 'https://i.pinimg.com/564x/99/e1/49/99e149cc798d211ce77b518caf8cbde7.jpg' })
+    image: string
+
     @Column({ default: 0 })
     aptitude: number;
 

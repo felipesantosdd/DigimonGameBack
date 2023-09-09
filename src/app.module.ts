@@ -7,6 +7,7 @@ import { TamerModule } from './tamer/tamer.module';
 import { ItemModule } from './item/item.module';
 import { EggModule } from './egg/egg.module';
 
+
 @Module({
   imports: [
     DigimonsModule,

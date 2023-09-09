@@ -34,6 +34,8 @@ export class DigimonEntity {
     sprite: string
     @Column()
     description: string
+    @Column({ default: 'https://i.pinimg.com/564x/99/e1/49/99e149cc798d211ce77b518caf8cbde7.jpg' })
+    image: string
     // @Column()
     // techniques: ITechnique[]
 }

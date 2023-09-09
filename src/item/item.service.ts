@@ -24,7 +24,6 @@ export class ItemService {
     }
 
     async create(data: IItems): Promise<IItems> {
-        console.log(data)
         const item = await this.itemRepository.save(data)
         return item
     }

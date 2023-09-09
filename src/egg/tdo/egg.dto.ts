@@ -39,6 +39,9 @@ export class EggDto {
     love: number
 
     @ApiProperty()
+    image: string
+
+    @ApiProperty()
     health: number
 
     @ApiProperty()
