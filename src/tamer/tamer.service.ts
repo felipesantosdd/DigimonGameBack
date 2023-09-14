@@ -10,6 +10,8 @@ import { DigimonEntity } from '../digimons/database/digimon.entity';
 import { CronJob } from 'cron';
 import { sign, verify } from "jsonwebtoken";
 import { compare } from "bcryptjs";
+import { ItemEntity } from '../item/database/item.entity';
+import { IItems } from '../item/items.interface';
 
 
 @Injectable()
@@ -21,7 +23,8 @@ export class TamerService {
     constructor(
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
         @InjectRepository(EggEntity) private eggRepository: Repository<EggEntity>,
-        @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>
+        @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>,
+        @InjectRepository(ItemEntity) private itemRepository: Repository<ItemEntity>
     ) {
         this.energyRechargeJob = new CronJob('* * * * *', this.energyRecharge.bind(this))
         this.energyRechargeJob.start()
@@ -58,8 +61,6 @@ export class TamerService {
 
         })
     }
-
-
 
     async findAll(): Promise<ITamer[]> {
         const tamers = await this.tamerRepository.find()
@@ -163,6 +164,100 @@ export class TamerService {
         return ({ token: token, user: response })
     }
 
+    async update(id: string, data: ITamer): Promise<ITamer> {
+
+        const tamer = await this.tamerRepository.findOne({
+            where: { id: id },
+            relations: { bag: true }
+        })
+
+        if (!tamer) {
+            throw new AppError("Tamer não encontrado", 404)
+        }
+
+        const newBag = []
+
+        if (data.bag && data.bag.length > 0) {
+            await Promise.all(data.bag.map(async (item) => {
+                const newItem = await this.itemRepository.findOne({ where: { id: item.id } });
+                console.log(newItem);
+                if (newItem) {
+                    newBag.push(newItem);
+                }
+            }));
+        }
+
+        tamer.bag = [...tamer.bag, ...newBag]
+
+        tamer.image = data.image || tamer.image
+        tamer.nickname = data.nickname || tamer.nickname
+
+        this.tamerRepository.save(tamer)
+
+        return tamer
+
+    }
+
+    async useItem(tamerId: string, itemId: string, digimonId: string): Promise<ITamer> {
+        const tamer = await this.tamerRepository.findOne({
+            where: { id: tamerId },
+            relations: { bag: true, digimons: true }
+        })
+        if (!tamer) {
+            throw new AppError('Tamer não encontrado', 404)
+        }
+
+        const item: IItems | undefined = tamer.bag.find(item => item.id === itemId);
+        if (!item) {
+            throw new AppError('Esse tamer não possui esse item', 404)
+        }
+
+        const egg = await this.eggRepository.findOne({ where: { id: digimonId } })
+        if (!egg) {
+            throw new AppError("Digimon não encontrado.", 404)
+        }
+
+        switch (item.type) {
+            case 'HP':
+                if (egg.atualHp < egg.evolutionHp) {
+                    egg.atualHp += item.effect
+
+                    console.log("Saúde recuperada");
+                    tamer.bag = tamer.bag.filter(bagItem => bagItem.id !== itemId);
+                } else {
+                    console.log("Saúde já está cheia")
+                }
+                break
+            case 'MP':
+                if (egg.atualMp < egg.evolutionMp) {
+                    egg.atualMp += item.effect
+
+                    console.log("MP recuperado");
+                    tamer.bag = tamer.bag.filter(bagItem => bagItem.id !== itemId);
+                } else {
+                    console.log("MP já está cheio")
+                }
+                break
+            case 'Food':
+                if (egg.health < 100) {
+                    console.log(item.effect)
+                    egg.health = egg.health + item.effect
+                    console.log(egg.health)
+
+
+                    console.log("Fome saciada");
+                    tamer.bag = tamer.bag.filter(bagItem => bagItem.id !== itemId);
+                } else {
+                    console.log("Seu digimon já está cheio")
+                }
+                break
+        }
+
+        await this.eggRepository.save(egg);
+
+        return tamer
+    }
+
 
     async authTamer(authToken: string): Promise<ITamer | any> {
 
@@ -198,6 +293,5 @@ export class TamerService {
             }
         })
     }
-
 
 }

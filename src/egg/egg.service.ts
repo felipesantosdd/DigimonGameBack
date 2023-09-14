@@ -19,6 +19,7 @@ export class EggService {
         @InjectRepository(EggEntity) private eggRepository: Repository<EggEntity>,
         @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>,
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
+
     ) {
         this.healthManagementJob = new CronJob('* * * * *', this.heathManagement.bind(this));
         this.healthManagementJob.start();
@@ -264,6 +265,13 @@ export class EggService {
             }
         })
     }
+
+    // async balttle(digi1: IEggMove, digi2: IEggMove) {
+    //     const egg1 = await this.eggRepository.findOne({ where: { id: digi1.id } })
+    //     const hability1 = await 
+
+    //     const egg2 = await this.eggRepository.findOne({ where: { id: digi2.id } })
+    // }
 
 
 

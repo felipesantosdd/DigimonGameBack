@@ -1,9 +1,8 @@
-import { Controller, Get, Param, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { IItems } from './items.interface';
 import { ApiBody } from '@nestjs/swagger';
 import { ItemDto } from './dto/item.dto';
-import { EggDto } from '../egg/tdo/egg.dto';
 import { EggService } from '../egg/egg.service';
 
 @Controller('item')
@@ -31,15 +30,4 @@ export class ItemController {
         return await this.itemService.create(item)
     }
 
-    @Patch('use/:id')
-    @ApiBody({ type: EggDto })
-    async useItem(@Param('id') id: string, @Body() digiId: { id: string }): Promise<void> {
-        const item = await this.itemService.findOne(id)
-        switch (item.type) {
-            case 'HP':
-                await this.eggService.recoverHp(digiId.id, item.effect)
-                break
-        }
-        return
-    }
 }

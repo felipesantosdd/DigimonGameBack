@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { TamerModule } from './tamer/tamer.module';
 import { ItemModule } from './item/item.module';
 import { EggModule } from './egg/egg.module';
+import { SkillModule } from './skill/skill.module';
 
 
 @Module({
@@ -14,7 +15,8 @@ import { EggModule } from './egg/egg.module';
     DatabaseModule,
     TamerModule,
     ItemModule,
-    EggModule
+    EggModule,
+    SkillModule
   ],
   controllers: [AppController],
   providers: [AppService],

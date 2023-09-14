@@ -25,3 +25,8 @@ export interface IDigiEgg {
     evolutionAttack: number
     image: string
 }
+
+export interface IEggMove {
+    id: string;
+    move: string
+}
