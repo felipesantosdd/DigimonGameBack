@@ -1,15 +1,9 @@
-FROM docker.io/library/node:18
+FROM node:16-alpine
 
-WORKDIR /usr/src/api
+WORKDIR /app
 
-COPY . .
+COPY package.json /app
 
-COPY ./.env.production ./.env
+RUN npm install
 
-RUN npm install --quiet --no-optional --no-found --loglevel=error
-
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm", "run", "prod"]
+COPY . /app

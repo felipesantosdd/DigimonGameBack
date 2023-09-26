@@ -105,6 +105,7 @@ export class EggService {
                 order: { form: 'ASC' }
             })
 
+
         if (!egg) {
             throw new AppError("Digimon Não encontrado", 404)
         }
@@ -226,8 +227,10 @@ export class EggService {
     async heathManagement() {
         const eggs = await this.eggRepository.find()
         eggs.map(egg => {
-            egg.health -= 1
-            this.eggRepository.save(egg)
+            if (egg.health <= 1) {
+                egg.health -= 1
+                this.eggRepository.save(egg)
+            }
 
         })
     }

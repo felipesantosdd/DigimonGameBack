@@ -24,6 +24,7 @@ export class TamerController {
 
     @Get()
     async getAll(): Promise<ITamer[]> {
+        console.log('teste7')
         const tamers = await this.tamerService.findAll()
         return tamers
     }
