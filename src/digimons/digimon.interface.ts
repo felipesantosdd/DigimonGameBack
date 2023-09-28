@@ -5,10 +5,10 @@ export interface IDigimon {
     level: number
     species: string
     type: string
-    core: string
     attribute: string
     hp: number
     mp: number
+    element: string
     attack: number
     defense: number
     speed: number

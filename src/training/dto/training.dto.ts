@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IDigimon } from "../../digimons/digimon.interface";
 
-export class MissionsDto {
+export class TrainingDto {
     @ApiProperty()
     id?: string;
 
@@ -9,20 +8,12 @@ export class MissionsDto {
     name: string;
 
     @ApiProperty()
-    type: string;
-
-    @ApiProperty()
     description: string;
 
     @ApiProperty()
-    cost: number;
-
-    @ApiProperty()
-    time: number;
+    type: string
 
     @ApiProperty()
     points: number;
 
-    @ApiProperty()
-    target?: IDigimon;
 }

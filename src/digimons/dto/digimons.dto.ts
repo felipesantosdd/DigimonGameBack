@@ -12,13 +12,13 @@ export class DigimonDto {
     level: number
 
     @ApiProperty()
+    element: string
+
+    @ApiProperty()
     species: string
 
     @ApiProperty()
     type: string
-
-    @ApiProperty()
-    core: string
 
     @ApiProperty()
     attribute: string

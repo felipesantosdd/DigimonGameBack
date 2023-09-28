@@ -16,8 +16,8 @@ export class MissionsService {
     }
 
     async findAll(): Promise<IMissions[]> {
-        const missions = await this.missionsRepository.find()
-        return missions
+        return await this.missionsRepository.find()
+
     }
 
 }

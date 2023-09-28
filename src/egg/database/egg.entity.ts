@@ -67,6 +67,18 @@ export class EggEntity {
     @Column({ default: 0 })
     evolutionAptitude: number;
 
+    @Column({ default: false })
+    inTraining: boolean
+
+    @Column({ default: '' })
+    trainingEnd: string
+
+    @Column({ default: 0 })
+    trainingPoints: number
+
+    @Column({ default: 10 })
+    nextPoints: number
+
     @ManyToOne(() => TamerEntity, (tamer) => tamer.digimons)
     tamer: TamerEntity;
 

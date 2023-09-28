@@ -68,5 +68,16 @@ export class EggDto {
     @ApiProperty()
     points: number
 
+    @ApiProperty()
+    inTraining: boolean
+
+    @ApiProperty()
+    trainingEnd: string
+
+    @ApiProperty()
+    trainingPoints: number
+
+    @ApiProperty()
+    nextPoints: number
 
 }
