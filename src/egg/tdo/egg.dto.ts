@@ -65,5 +65,8 @@ export class EggDto {
     @ApiProperty()
     evolutionAptitude: number
 
+    @ApiProperty()
+    points: number
+
 
 }

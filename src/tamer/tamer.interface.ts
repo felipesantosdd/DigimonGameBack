@@ -1,3 +1,4 @@
+import { IMissions } from "../missions/missions.interface";
 import { IDigiEgg } from "../egg/egg.interface"
 import { IItems } from "../item/items.interface";
 
@@ -13,4 +14,7 @@ export interface ITamer {
     atualEnergy: number
     xp: number
     nickname: string
+    missions: IMissions[]
+    inMission: boolean
+    missionReturn: string
 }

@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IDigiEgg } from "src/egg/egg.interface";
 import { IItems } from "src/item/items.interface";
+import { IMissions } from "src/missions/missions.interface";
 
 
 export class TamerDto {
@@ -37,4 +38,12 @@ export class TamerDto {
     @ApiProperty()
     xp: number
 
+    @ApiProperty()
+    missions: IMissions[]
+
+    @ApiProperty()
+    inMission: boolean
+
+    @ApiProperty()
+    missionReturn: string
 }

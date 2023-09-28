@@ -41,6 +41,9 @@ export class EggEntity {
     image: string
 
     @Column({ default: 0 })
+    points: number
+
+    @Column({ default: 0 })
     aptitude: number;
 
     @Column({ default: 10 })

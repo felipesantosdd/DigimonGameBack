@@ -287,9 +287,7 @@ export class EggService {
                 if (egg.atualHp > egg.evolutionHp) {
                     egg.atualHp = egg.evolutionHp
                 }
-                if (Math.round(egg.evolutionHp * 0.01) > 0) {
-                    console.log(`${egg.name} recuperou ${Math.round(egg.evolutionHp * 0.01)} de Hp`)
-                }
+
                 this.eggRepository.save(egg)
             }
 

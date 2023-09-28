@@ -24,6 +24,7 @@ export interface IDigiEgg {
     evolutionAptitude: number
     evolutionAttack: number
     image: string
+    points: number
 }
 
 export interface IEggMove {

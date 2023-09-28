@@ -82,6 +82,20 @@ export class TamerController {
         return tamer;
     }
 
+    @Post('/startMission/:id')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                missionId: { type: 'string' },
+            },
+        },
+    })
+    async startMission(@Param('id') tamerId: string, @Body() data: { missionId: string }): Promise<ITamer> {
+        const tamer = await this.tamerService.startMission(tamerId, data.missionId)
+        return tamer
+    }
+
 
 
 }
