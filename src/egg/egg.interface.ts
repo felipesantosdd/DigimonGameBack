@@ -1,4 +1,5 @@
 import { IDigimon } from "src/digimons/digimon.interface"
+import { IMissions } from "../missions/missions.interface";
 import { ITamer } from "../tamer/tamer.interface"
 
 export interface IDigiEgg {
@@ -24,11 +25,16 @@ export interface IDigiEgg {
     evolutionAptitude: number
     evolutionAttack: number
     image: string
+
     points: number
+    trainingIntensity: number
     inTraining: boolean
     trainingEnd: string
     trainingPoints: number
     nextPoints: number
+    missions: IMissions[]
+    inMission: boolean
+    missionReturn: string
 }
 
 export interface IEggMove {

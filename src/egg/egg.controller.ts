@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Post, Body, Patch, Delete } from '@nestjs/common';
 import { EggService } from './egg.service';
 import { IDigiEgg } from './egg.interface';
 import { ApiBody } from '@nestjs/swagger';
@@ -26,6 +26,11 @@ export class EggController {
         return eggs
     }
 
+    @Delete(':id')
+    async deleteById(@Param('id') eggId: string): Promise<void> {
+        return await this.eggService.delete(eggId)
+    }
+
     @Post()
     @ApiBody({ type: EggDto })
     async create(@Body() data: { id: string }): Promise<IDigiEgg> {
@@ -43,5 +48,19 @@ export class EggController {
     async evolution(@Param('id') id: string, @Body() data: { evoId: string }): Promise<IDigiEgg> {
         return this.eggService.evolution(id, data)
     }
+
+    @Post('training/:eggId/:intensity')
+    @ApiBody({ type: EggDto })
+    async trainingStart(@Param('eggId') eggId: string, @Param('intensity') intensity: number): Promise<IDigiEgg> {
+        return this.eggService.trainingStart(eggId, intensity)
+    }
+
+    @Post('mission/:eggId')
+    @ApiBody({ type: String }) // Usei String como tipo para missionId
+    async startMission(@Param('eggId') eggId: string, @Body() data: { missionId: string }): Promise<IDigiEgg> {
+        return this.eggService.startMission(eggId, data.missionId);
+    }
+
+
 
 }

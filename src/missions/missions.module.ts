@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TamerEntity } from '../tamer/database/tamer.entity';
 import { DigimonEntity } from '../digimons/database/digimon.entity';
 import { MissionsEntity } from './database/missions.entity';
+import { EggEntity } from '../egg/database/egg.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MissionsEntity, TamerEntity, DigimonEntity])],
+  imports: [TypeOrmModule.forFeature([MissionsEntity, TamerEntity, DigimonEntity, EggEntity])],
   controllers: [MissionsController],
   providers: [MissionsService]
 })

@@ -12,41 +12,7 @@ import { sign, verify } from "jsonwebtoken";
 import { compare } from "bcryptjs";
 import { ItemEntity } from '../item/database/item.entity';
 import { IItems } from '../item/items.interface';
-import { MissionsEntity } from '../missions/database/missions.entity';
 
-
-function enterMission(hora: number) {
-    const agora = new Date();
-    const horaAtual = agora.getHours();
-    const minutoAtual = agora.getMinutes();
-
-
-    let novaHora = horaAtual + hora;
-
-    if (novaHora >= 24) {
-        novaHora %= 24;
-    }
-    const novaHoraFormatada = String(novaHora).padStart(2, '0');
-    const minutoFormatado = String(minutoAtual).padStart(2, '0');
-
-    return `${novaHoraFormatada}:${minutoFormatado}`;
-}
-
-function validarHora(hora: string) {
-    const agora = new Date();
-    const horaAtual = agora.getHours();
-    const minutoAtual = agora.getMinutes();
-
-
-    const [horaCompararHora, horaCompararMinuto] = hora.split(':').map(Number);
-
-
-    if (horaAtual > horaCompararHora || (horaAtual === horaCompararHora && minutoAtual >= horaCompararMinuto)) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 
 @Injectable()
@@ -54,14 +20,14 @@ export class TamerService {
 
     private energyRechargeJob: CronJob;
     private evoCostJob: CronJob
-    private returnMissionJob: CronJob
+
 
     constructor(
         @InjectRepository(TamerEntity) private tamerRepository: Repository<TamerEntity>,
         @InjectRepository(EggEntity) private eggRepository: Repository<EggEntity>,
         @InjectRepository(DigimonEntity) private digimonsRepository: Repository<DigimonEntity>,
         @InjectRepository(ItemEntity) private itemRepository: Repository<ItemEntity>,
-        @InjectRepository(MissionsEntity) private missionsRepository: Repository<MissionsEntity>
+
     ) {
         this.energyRechargeJob = new CronJob('* * * * *', this.energyRecharge.bind(this))
         this.energyRechargeJob.start()
@@ -69,8 +35,6 @@ export class TamerService {
         this.evoCostJob = new CronJob('* * * * *', this.evoCost.bind(this))
         this.evoCostJob.start()
 
-        this.returnMissionJob = new CronJob('* * * * *', this.returnMission.bind(this))
-        this.returnMissionJob.start()
     }
 
     async findOne(id: string): Promise<ITamer> {
@@ -80,7 +44,6 @@ export class TamerService {
                 relations: {
                     digimons: true,
                     bag: true,
-                    missions: true
                 }
             }
         );
@@ -331,63 +294,6 @@ export class TamerService {
         })
     }
 
-    async startMission(userId: string, missionId: string): Promise<ITamer> {
-        const tamer = await this.tamerRepository.findOne({
-            where: { id: userId },
-            relations: { digimons: true, bag: true, missions: true }
-        })
 
-        if (!tamer) {
-            throw new AppError("Tamer não encontrado", 404)
-        }
-
-        const mission = await this.missionsRepository.findOne({ where: { id: missionId } })
-
-        if (!mission) {
-            throw new AppError("Miss não encontrada", 404)
-        }
-
-        const finished = tamer.missions.some(missao => missao.id === mission.id)
-        if (finished) {
-            throw new AppError("Você já fez esta missão", 404)
-        }
-
-        if (tamer.inMission === true) {
-            throw new AppError("Você já está em uma missão", 404)
-        }
-
-        tamer.missionReturn = enterMission(mission.time)
-        tamer.inMission = true
-        tamer.missions.push(mission)
-
-        this.tamerRepository.save(tamer)
-
-        return tamer
-    }
-
-    async returnMission() {
-        const tamers = await this.tamerRepository.find({
-            relations: { digimons: true, bag: true, missions: true }
-        })
-
-        tamers.map((tamer) => {
-            if (tamer.inMission) {
-                const missionDone = validarHora(tamer.missionReturn)
-                if (missionDone) {
-                    tamer.inMission = false
-
-                    const points = tamer.missions[tamer.missions.length - 1].points / tamer.digimons.length;
-
-
-                    tamer.digimons.map((digimon) => {
-                        digimon.points = digimon.points += points
-                        this.eggRepository.save(digimon)
-                    })
-                    this.tamerRepository.save(tamer)
-                }
-            }
-        })
-
-    }
 
 }

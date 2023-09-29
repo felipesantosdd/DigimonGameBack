@@ -8,7 +8,6 @@ import { ItemModule } from './item/item.module';
 import { EggModule } from './egg/egg.module';
 import { SkillModule } from './skill/skill.module';
 import { MissionsModule } from './missions/missions.module';
-import { TrainingModule } from './training/training.module';
 
 
 @Module({
@@ -19,8 +18,7 @@ import { TrainingModule } from './training/training.module';
     ItemModule,
     EggModule,
     SkillModule,
-    MissionsModule,
-    TrainingModule
+    MissionsModule
   ],
   controllers: [AppController],
   providers: [AppService],

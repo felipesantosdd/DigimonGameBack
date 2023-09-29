@@ -1,3 +1,4 @@
+import { MissionsEntity } from '../../missions/database/missions.entity';
 import { DigimonEntity } from "../../digimons/database/digimon.entity";
 import { TamerEntity } from "../../tamer/database/tamer.entity";
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -41,7 +42,7 @@ export class EggEntity {
     image: string
 
     @Column({ default: 0 })
-    points: number
+    trainingIntensity: number
 
     @Column({ default: 0 })
     aptitude: number;
@@ -74,6 +75,9 @@ export class EggEntity {
     trainingEnd: string
 
     @Column({ default: 0 })
+    points: number
+
+    @Column({ default: 0 })
     trainingPoints: number
 
     @Column({ default: 10 })
@@ -81,6 +85,16 @@ export class EggEntity {
 
     @ManyToOne(() => TamerEntity, (tamer) => tamer.digimons)
     tamer: TamerEntity;
+
+    @Column({ default: false })
+    inMission: boolean;
+
+    @Column({ default: '0' })
+    missionReturn: string;
+
+    @ManyToMany(() => MissionsEntity)
+    @JoinTable()
+    missions: MissionsEntity[];
 
     @ManyToMany(() => DigimonEntity)
     @JoinTable()

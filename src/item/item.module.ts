@@ -7,9 +7,10 @@ import { EggEntity } from '../egg/database/egg.entity';
 import { TamerEntity } from '../tamer/database/tamer.entity';
 import { EggService } from '../egg/egg.service';
 import { DigimonEntity } from '../digimons/database/digimon.entity';
+import { MissionsEntity } from '../missions/database/missions.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ItemEntity, EggEntity, TamerEntity, DigimonEntity])],
+  imports: [TypeOrmModule.forFeature([ItemEntity, EggEntity, TamerEntity, DigimonEntity, MissionsEntity])],
   controllers: [ItemController],
   providers: [ItemService, EggService]
 })

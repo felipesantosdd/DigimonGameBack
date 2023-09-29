@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IDigimon } from "src/digimons/digimon.interface";
-
+import { IMissions } from "src/missions/missions.interface";
 export class EggDto {
     @ApiProperty()
     id: string
@@ -66,7 +66,7 @@ export class EggDto {
     evolutionAptitude: number
 
     @ApiProperty()
-    points: number
+    trainingIntensity: number
 
     @ApiProperty()
     inTraining: boolean
@@ -79,5 +79,17 @@ export class EggDto {
 
     @ApiProperty()
     nextPoints: number
+
+    @ApiProperty()
+    missions: IMissions[]
+
+    @ApiProperty()
+    inMission: boolean
+
+    @ApiProperty()
+    missionReturn: string
+
+    @ApiProperty()
+    points: number
 
 }
