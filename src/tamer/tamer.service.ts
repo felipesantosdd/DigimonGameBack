@@ -92,7 +92,7 @@ export class TamerService {
         const egg = this.eggRepository.create()
         egg.tamer = tamer
 
-        const evolutions = await this.digimonsRepository.find({ where: { level: 0 } })
+        const evolutions = await this.digimonsRepository.find({ where: { level: 1 } })
         const randomIndex = Math.floor(Math.random() * evolutions.length);
         const randomEvolution = evolutions[randomIndex];
 
